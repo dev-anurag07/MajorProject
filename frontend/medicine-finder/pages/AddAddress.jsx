@@ -2,6 +2,9 @@ import React from 'react'
 import { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import API from '../services/api';
+
+
 
 const AddAddress = () => {
     const navigate = useNavigate();
@@ -13,17 +16,34 @@ const AddAddress = () => {
       city:"",
       state:"",
       pincode:"",
-      latitude:location.state?.lat||"",
-      longitude:location.state?.lng||"",
+      lat:location.state?.lat||"",
+      long:location.state?.lng||"",
     })
 
      console.log(formData)
+
+     const handlesubmit = async(e)=>{
+e.preventDefault();
+
+try {
+      
+  const response = await API.post("user/add-address", formData);
+  console.log(response.data);
+
+
+} catch (error) {
+  console.log(error);
+}
+}
 
   return (
     <div>
         <h1>Add New Address</h1>
 
+        <button onClick={()=>navigate("/map-picker")} className='bg-blue-600 text-white px-4 py-2 rounded-lg'>Choose Location</button>
 
+      <form onSubmit={handlesubmit}>
+        
         <input type="text"
         placeholder="Home/Ofiice"
         value={formData.label}
@@ -64,7 +84,10 @@ const AddAddress = () => {
         onChange={(e)=>setformData({...formData,
           pincode:e.target.value,
         })}/>
+            
 
+            <button type="submit">Save Address</button>
+      </form>
          
 
        <input type="text"

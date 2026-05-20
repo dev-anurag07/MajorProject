@@ -66,7 +66,7 @@ const handleCancel = async (id) => {
               Code: {order.reservationCode}
             </p>
 
-            {/* Items */}
+            
             {order.items.map((item) => (
               <div key={item._id} className="mt-2">
                 <p>{item.medicineName}</p>
