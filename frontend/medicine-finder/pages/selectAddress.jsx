@@ -1,22 +1,28 @@
-import React from "react";
+import React, { useEffect,useState } from "react";
 import AddAddress from "./AddAddress";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 
 
 const SelectAddress=()=>{
     const navigate = useNavigate();
-    const addresses =[
-        {label:"Home",
-            address:"Vijay Nagar, Indore",
-        },
+  
+    const [addresses, setaddresses] = useState([]);
 
-        {
-            label:"Work",
-            address:"Palasia, Indore",
+    useEffect(()=>{
+        const fetchAddresses = async ()=>{
+            try {
+                const response = await API.get("/user/get-address");
+                console.log(response.data);
+                setaddresses(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-        },
-    ];
+        fetchAddresses();
+    },[]);
 
 
     return (
@@ -31,8 +37,13 @@ const SelectAddress=()=>{
 
             <div>
                 {addresses.map((item,index)=>(
-                    <div key ={index}>
-                       <h3>{item.label}</h3>
+                    <div key ={index}
+                    className="border p-4 rounded-lg mb-4 cursor-pointer"
+                    onClick={()=>{
+                        localStorage.setItem("selectedAddress", JSON.stringify(item));
+                        navigate("/");
+                    }}>
+                       <h3 >{item.label}</h3>
                        <p>{item.address}
 
                        </p>
