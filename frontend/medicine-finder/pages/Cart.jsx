@@ -10,7 +10,7 @@ const Cart = () => {
     setCart(storedCart);
   }, []);
 
-  // ✅ INCREASE
+  
   const increaseQty = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -24,7 +24,7 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  // ✅ DECREASE
+  
   const decreaseQty = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -45,7 +45,7 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  // ✅ REMOVE ITEM
+ 
   const handleRemove = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -80,7 +80,7 @@ const Cart = () => {
 
       alert(`Reservation Successful! \nReservation Code :${response.data.reservationCode}`);
 
-      // remove only that pharmacy
+     
       delete storedCart[pharmacyId];
 
       localStorage.setItem("cart", JSON.stringify(storedCart));
@@ -113,12 +113,12 @@ const Cart = () => {
               key={pharmacyId}
               className="border p-4 mb-6 rounded"
             >
-              {/* Pharmacy Name */}
+              
               <h2 className="text-lg font-bold mb-3">
                 {items[0]?.pharmacyName}
               </h2>
 
-              {/* Items */}
+            
               {items.map((item) => (
                 <div
                   key={item.inventoryId}
@@ -160,12 +160,11 @@ const Cart = () => {
                 </div>
               ))}
 
-              {/* Total */}
+            
               <h3 className="mt-4 font-bold text-lg">
                 Total: ₹{total}
               </h3>
 
-              {/* Place Order */}
               <button
                 onClick={() => handlePlaceOrder(pharmacyId)}
                 className="bg-green-600 text-white px-4 py-2 mt-4 rounded"
