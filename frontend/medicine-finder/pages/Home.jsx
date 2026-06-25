@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react';
 import API from '../services/api';
+import PharmacyCard from "../components/PharmacyCard"
 
 
 const Home = () => {
@@ -15,8 +16,17 @@ const Home = () => {
 
   const searchMedicine = async ()=>{
     try {
-      const response = await API.post("/search",{medicine,coordinates:selectedAddress.location.coordinates,});
-      setresults(response.data);
+      const response = await API.get("user/nearby",{
+        params:{
+          medicine,
+          lat:
+          selectedAddress.location.coordinates[1],
+          lang:
+          selectedAddress.location.coordinates[0]
+        }
+      });
+      console.log(response.data);
+      setresults(response.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -39,6 +49,11 @@ const Home = () => {
 
       <button  onClick={searchMedicine}
       className='bg-green-600 text-white px-4 py-2 rounded-lg mt-4 w-full'>Search</button>
+
+      <div className='mt-6'>{results.map((pharmacy)=>(<PharmacyCard 
+      key={pharmacy._id}
+      pharmacy={pharmacy}/>))}
+      </div>
     </div>
   )
 }

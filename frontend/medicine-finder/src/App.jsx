@@ -6,12 +6,14 @@ import Search from '../pages/Search'
 import Cart from '../pages/Cart'
 import Orders from "../pages/Orders";
 import {Routes,Route } from 'react-router-dom'
-import PharmacyDashboard from "../pages/PharmacyDetails"
+import PharmacyDashboard from "../pages/PharmacyDashboard"
 import AddInventory from "../pages/addInventory";
 import Inventory from '../pages/InventoryPage';
 import SelectAddress from '../pages/selectAddress';
 import AddAddress from '../pages/AddAddress';
 import MapPicker from '../pages/MapPicker'
+import PharmacyCard from '../components/PharmacyCard'
+import PharmacyDetails from '../pages/PharmacyDetails'
 
 
 const App = () => {
@@ -30,6 +32,7 @@ const App = () => {
      <Route path="/select-address" element={<SelectAddress/>}/>
      <Route path="/add-address" element={<AddAddress/>}/>
      <Route path="/map-picker" element={<MapPicker/>}/>
+     <Route path="/pharmacy/:id" element={<PharmacyDetails/>}/>
     </Routes>
     </>
     

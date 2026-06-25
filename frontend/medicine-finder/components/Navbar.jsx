@@ -28,7 +28,7 @@ const Navbar = () => {
           MediFinder
         </Link>
 
-        {/* 🔍 Search only for users */}
+        
         {role === "user" && (
           <form onSubmit={handleSearch}>
             <input
@@ -43,7 +43,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-6 text-sm font-medium">
 
-          {/* 🏥 PHARMACY NAV */}
+          
           {role === "pharmacy" && (
             <>
               <Link to="/pharmacy/dashboard">Dashboard</Link>
@@ -51,7 +51,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* 👤 USER NAV */}
+          
           {role === "user" && (
             <>
               <Link to="/">Home</Link>

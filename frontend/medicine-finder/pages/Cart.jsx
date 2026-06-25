@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/api.js";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [cart, setCart] = useState({});
@@ -60,7 +61,8 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  // ✅ PLACE ORDER (ONE PHARMACY)
+  
+  const navigate = useNavigate();
   const handlePlaceOrder = async (pharmacyId) => {
     const storedCart =
       JSON.parse(localStorage.getItem("cart")) || {};
@@ -71,12 +73,12 @@ const Cart = () => {
     }));
 
     try {
-      await API.post("/orders/reserve", {
+      const response = await API.post("/orders/reserve", {
         pharmacyId,
         items,
       });
 
-      alert("Order placed successfully");
+      alert(`Reservation Successful! \nReservation Code :${response.data.reservationCode}`);
 
       // remove only that pharmacy
       delete storedCart[pharmacyId];
@@ -84,6 +86,7 @@ const Cart = () => {
       localStorage.setItem("cart", JSON.stringify(storedCart));
       setCart({ ...storedCart });
 
+      navigate('/orders');
     } catch (error) {
       console.log(error);
       alert("Order failed");

@@ -1,119 +1,96 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import API from "../services/api";
-import { useNavigate } from "react-router-dom";
 
-const PharmacyDashboard = () => {
-  const [orders, setOrders] = useState([]);
-const navigate = useNavigate();
-const handleUpdateStatus = async (id, status) => {
-  try {
-    await API.put(`/orders/status/${id}`, { status });
+const PharmacyDetails = () => {
+  const { id } = useParams();
 
-    // update UI instantly
-    setOrders((prev) =>
-      prev.map((order) =>
-        order._id === id ? { ...order, status } : order
-      )
+  const [pharmacy, setpharmacy] = useState(null);
+  const [inventory, setinventory] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const res = await API.get(`user/getpharmacydetails/${id}`);
+
+      setpharmacy(res.data.data.pharmacy);
+      setinventory(res.data.data.inventory);
+    };
+
+    fetchDetails();
+  }, [id]);
+
+  const addToCart = (medicine) => {
+    const storedCart =
+      JSON.parse(localStorage.getItem("cart")) || {};
+
+    const pharmacyId = pharmacy._id;
+
+    if (!storedCart[pharmacyId]) {
+      storedCart[pharmacyId] = [];
+    }
+
+    const existing = storedCart[pharmacyId].find(
+      (item) => item.inventoryId === medicine._id
     );
 
-  } catch (error) {
-    alert(error.response?.data?.message || "Update failed");
-  }
-};
-  
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    try {
-      const res = await API.get("/orders/incoming");
-      setOrders(res.data.data);
-    } catch (error) {
-      console.log(error);
-      alert("Failed to load orders");
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      storedCart[pharmacyId].push({
+        inventoryId: medicine._id,
+        medicineName: medicine.medicineName,
+        quantity: 1,
+        price: medicine.price,
+        pharmacyName: pharmacy.name,
+      });
     }
+
+    localStorage.setItem("cart", JSON.stringify(storedCart));
+
+    alert("Medicine added to cart");
   };
+
+  if (!pharmacy) return <p>Loading...</p>;
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-  <h2 className="text-xl font-bold">
-    Pharmacy Dashboard
-  </h2>
+      <h1 className="text-2xl font-bold">{pharmacy.name}</h1>
 
-  <button
-    onClick={() => navigate("/add-inventory")}
-    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-  >
-    + Add Medicine
-  </button>
-</div>
+      <p>Address: {pharmacy.address}</p>
+      <p>Phone: {pharmacy.phoneNumber}</p>
+      <p>License: {pharmacy.licenseNumber}</p>
 
-      {orders.length === 0 ? (
-        <p>No orders yet</p>
-      ) : (
-        orders.map((order) => (
-          <div
-            key={order._id}
-            className="border p-4 mb-4 rounded shadow"
+      <h2 className="text-xl font-semibold mt-4">
+        Available Medicines
+      </h2>
+
+      {inventory.map((item) => (
+        <div
+          key={item._id}
+          className="border p-3 rounded my-2"
+        >
+          <p>{item.medicineName}</p>
+          <p>₹{item.price}</p>
+
+          <button
+            className="bg-green-600 text-white px-3 py-1 rounded mt-2"
+            onClick={() => addToCart(item)}
           >
-            {/* Pharmacy */}
-            <h3 className="font-bold text-lg">
-              {order.pharmacy?.name}
-            </h3>
+            Add To Cart
+          </button>
+        </div>
+      ))}
 
-            {/* Customer */}
-            <p className="text-sm text-gray-500">
-              Customer: {order.user?.Name}
-            </p>
-
-            <p className="text-sm text-gray-500">
-              Phone: {order.user?.phoneNumber}
-            </p>
-
-            {/* Status */}
-            <div className="mt-2">
-  <label className="text-sm mr-2">Status:</label>
-
-  <select
-    value={order.status}
-    onChange={(e) =>
-      handleUpdateStatus(order._id, e.target.value)
-    }
-    className="border p-1 rounded"
-  >
-    <option value="Pending">Pending</option>
-    <option value="Confirmed">Confirmed</option>
-    <option value="Picked Up">Picked Up</option>
-    <option value="Cancelled">Cancelled</option>
-  </select>
-</div>
-
-            {/* Reservation Code */}
-            <p className="text-sm text-blue-600 font-bold mt-1">
-              Code: {order.reservationCode}
-            </p>
-
-            {/* Items */}
-            {order.items.map((item) => (
-              <div key={item._id} className="mt-2">
-                <p>{item.medicineName}</p>
-                <p>
-                  ₹{item.pricePerUnit} × {item.quantity}
-                </p>
-              </div>
-            ))}
-
-            {/* Total */}
-            <h4 className="mt-3 font-bold">
-              Total: ₹{order.totalAmount}
-            </h4>
-          </div>
-        ))
-      )}
+      <button
+        onClick={() => navigate("/cart")}
+        className="bg-blue-600 text-white px-5 py-2 rounded mt-6"
+      >
+        Go To Cart
+      </button>
     </div>
   );
 };
 
-export default PharmacyDashboard;
+export default PharmacyDetails;
