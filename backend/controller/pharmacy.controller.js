@@ -45,13 +45,14 @@ res.status(500).json({message:"Server error", error:error.message});
 export const getNearbyPharmacies = async (req,res)=>{
 try {
     const {lat,lang,radius,medicine} = req.query;
+    console.log(req.query);
 
     if(!lat || !lang){
         return res.status(400).json({message:"coordinates are required to find nearby pharamcies"});
     }
 
-    const distanceinmeters = radius ? parseFloat(radius)*1000:5000;
-
+    const distanceinmeters = radius ? parseFloat(radius)*1000:500000;
+console.log(await Pharmacy.find());
     const pharmacies = await Pharmacy.aggregate([
   {
     $geoNear: {
@@ -100,9 +101,11 @@ try {
   }
 }
 
-]); // 🔥 THIS WAS MISSING
+]); 
 
-console.log(pharamcies);
+console.log(pharmacies);
+
+
 
 // ✅ Now response
 res.status(200).json({
