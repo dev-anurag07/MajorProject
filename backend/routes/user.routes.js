@@ -5,6 +5,7 @@ import { protect } from "../middleware/authmiddleware.js";
 import { getNearbyPharmacies } from "../controller/pharmacy.controller.js";
 import { getPharmacydetails } from "../controller/pharmacy.controller.js";
 import { getAddresses } from "../controller/user.controller.js";
+import { getProfile } from "../controller/user.controller.js";
 
 
 const router = express.Router();
@@ -14,7 +15,7 @@ router.post('/login',loginUser);
 
 router.put('/add-avatar',protect,upload.single("avatar"),addAvatar);
 
-
+router.get("/profile",protect,getProfile);
 router.post('/add-address',protect,addAddress);
 router.get("/nearby",protect,getNearbyPharmacies)
 router.get("/getpharmacydetails/:id",protect,getPharmacydetails)

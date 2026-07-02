@@ -13,7 +13,7 @@ export const addMedicine = async (req, res) => {
       isAvailable
     } = req.body;
 
-    // ✅ basic validation
+    
     if (!medicineName || !price || !stockQuantity) {
       return res.status(400).json({
         message: "Missing required fields"
@@ -29,9 +29,9 @@ export const addMedicine = async (req, res) => {
       });
     }
 
-    // ✅ create inventory
+   
     const newInventory = await Inventory.create({
-      PharmacyId: pharmacy._id, // 🔥 important fix
+      PharmacyId: pharmacy._id, 
       medicineName,
       manufacturer,
       price,

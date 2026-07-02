@@ -1,15 +1,40 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const PharmacyDashboard = () => {
   const [orders, setOrders] = useState([]);
+  const [code, setcode] = useState("");
+  const [searchedOrder, setsearchedOrder] = useState(null);
+  const [stats, setstats] = useState({
+    totalOrders:0,
+    pendingOrders:0,
+    totalRevenue:0,
+    totalMedicines:0,
+  })
+
 const navigate = useNavigate();
+
+
+
+const searchReservation = async ()=>{
+  try {
+    const res = await API.get(`/orders/search/${code}`);
+console.log(res.data);
+    setsearchedOrder(res.data.data);
+  } catch (error) {
+    toast.error("Reservation not found");
+    setsearchedOrder(null);
+  }
+}
+
+
 const handleUpdateStatus = async (id, status) => {
   try {
     await API.put(`/orders/status/${id}`, { status });
 
-    // update UI instantly
+    
     setOrders((prev) =>
       prev.map((order) =>
         order._id === id ? { ...order, status } : order
@@ -17,7 +42,7 @@ const handleUpdateStatus = async (id, status) => {
     );
 
   } catch (error) {
-    alert(error.response?.data?.message || "Update failed");
+    toast.error(error.response?.data?.message || "Update failed");
   }
 };
   
@@ -28,29 +53,126 @@ const handleUpdateStatus = async (id, status) => {
   const fetchOrders = async () => {
     try {
       const res = await API.get("/orders/incoming");
-      setOrders(res.data.data);
+      const orderData = res.data.data;
+
+setOrders(orderData);
+
+setstats({
+  totalOrders: orderData.length,
+  pendingOrders: orderData.filter(
+    (o) => o.status === "Pending"
+  ).length,
+  totalRevenue: orderData.reduce(
+    (sum, o) => sum + Number(o.totalAmount),
+    0
+  ),
+  totalMedicines: orderData.reduce(
+    (sum, o) => sum + o.items.length,
+    0
+  ),
+});
     } catch (error) {
       console.log(error);
-      alert("Failed to load orders");
+      toast.error("Failed to load orders");
     }
   };
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-  <h2 className="text-xl font-bold">
-    Pharmacy Dashboard
+    <div className="flex justify-between items-center mb-6">
+  <h2 className="text-3xl font-bold text-green-700">
+    🏥 Pharmacy Dashboard
   </h2>
-
-  <button
-    onClick={() => navigate("/add-inventory")}
-    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-  >
-    + Add Medicine
-  </button>
 </div>
 
-      {orders.length === 0 ? (
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+
+  <div className="bg-blue-100 rounded-xl p-4 shadow">
+    <p className="text-gray-600">Orders</p>
+    <h2 className="text-3xl font-bold">
+      {stats.totalOrders}
+    </h2>
+  </div>
+
+  <div className="bg-yellow-100 rounded-xl p-4 shadow">
+    <p className="text-gray-600">Pending</p>
+    <h2 className="text-3xl font-bold">
+      {stats.pendingOrders}
+    </h2>
+  </div>
+
+  <div className="bg-green-100 rounded-xl p-4 shadow">
+    <p className="text-gray-600">Revenue</p>
+    <h2 className="text-3xl font-bold">
+      ₹{stats.totalRevenue}
+    </h2>
+  </div>
+
+  <div className="bg-purple-100 rounded-xl p-4 shadow">
+    <p className="text-gray-600">Medicines</p>
+    <h2 className="text-3xl font-bold">
+      {stats.totalMedicines}
+    </h2>
+  </div>
+
+</div>
+
+
+<div className="mb-6 flex items-center gap-2">
+  <input type ='text'
+  placeholder ="Enter Reservation code"
+  value={code}
+  onChange={(e)=>{setcode(e.target.value);
+    if(e.target.value.trim()===""){
+      setsearchedOrder(null);
+      fetchOrders();
+    }
+  }}
+  
+  className="border p-2 rounded w-72"/>
+
+
+<button onClick={searchReservation} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Search</button>
+</div>
+
+
+      {searchedOrder ? (
+  <div
+    key={searchedOrder._id}
+    className="border p-4 mb-4 rounded shadow"
+  >
+    <h3 className="font-bold text-lg">
+      {searchedOrder.pharmacy?.name}
+    </h3>
+
+    <p className="text-sm text-gray-500">
+      Customer: {searchedOrder.user?.Name}
+    </p>
+
+    <p className="text-sm text-gray-500">
+      Phone: {searchedOrder.user?.phoneNumber}
+    </p>
+
+    <p>Status: {searchedOrder.status}</p>
+
+    <p className="text-blue-600 font-bold">
+      Code: {searchedOrder.reservationCode}
+    </p>
+
+    {searchedOrder.items.map((item) => (
+      <div key={item._id}>
+        <p>{item.medicineName}</p>
+        <p>
+          ₹{item.pricePerUnit} × {item.quantity}
+        </p>
+      </div>
+    ))}
+
+    <h4 className="font-bold mt-2">
+      Total: ₹{searchedOrder.totalAmount}
+    </h4>
+  </div>
+) : orders.length === 0 ? (
         <p>No orders yet</p>
       ) : (
         orders.map((order) => (

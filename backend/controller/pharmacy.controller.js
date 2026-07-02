@@ -97,7 +97,10 @@ console.log(await Pharmacy.find());
     distance_km: 1,
     medicineName: "$inventory_items.medicineName", // ✅ IMPORTANT
     price: "$inventory_items.price", // ✅ IMPORTANT
-    inventoryId: "$inventory_items._id"
+    inventoryId: "$inventory_items._id",
+    stockQuantity:"$inventory_items.stockQuantity",
+    isAvailable:"$inventory_items.isAvailable"
+
   }
 }
 
@@ -143,4 +146,39 @@ export const getPharmacydetails = async (req,res)=>{
     } catch (error) {
         res.status(500).json({ message: "Error fetching pharmacy details" });
     }
+}
+
+export const getPharmacyProfile= async(req,res)=>{
+try {
+  const pharmacy = await Pharmacy.findOne({owner:req.user._id});
+
+  if(!pharmacy){
+    return res.status(404).json({message:"Pharmacy not found"});
+  }
+
+ res.status(200).json({success:true,
+  data:pharmacy
+ });
+
+
+
+
+} catch (error) {
+  res.status(500).json({message:error.message});
+}
+}
+
+export const updatePharmacyProfile= async(req,res)=>{
+try {
+  const pharmacy = await Pharmacy.findOneAndUpdate({owner:req.user._id},req.body,{new:true});
+  if(!pharmacy){
+    return res.status(404).json({message:"Pharmacy not found"});
+  }
+
+  res.status(200).json({success:true,
+    data:pharmacy,
+  })
+} catch (error) {
+  res.status(500).json({message:error.message})
+}
 }

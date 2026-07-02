@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
@@ -29,7 +30,8 @@ const Navbar = () => {
         </Link>
 
         
-        {role === "user" && (
+        {role === "user" && 
+        location.pathname ==="/" && (
           <form onSubmit={handleSearch}>
             <input
               type="text"
@@ -48,6 +50,8 @@ const Navbar = () => {
             <>
               <Link to="/pharmacy/dashboard">Dashboard</Link>
               <Link to="/inventory">Inventory</Link>
+              <Link to="/add-inventory">Add Medicine</Link>
+              <Link to="/pharmacy/profile">Profile</Link>
             </>
           )}
 
@@ -57,10 +61,11 @@ const Navbar = () => {
               <Link to="/">Home</Link>
               <Link to="/cart">Cart</Link>
               <Link to="/orders">Orders</Link>
+              <Link to="/profile">Profile</Link>
             </>
           )}
 
-          {/* COMMON */}
+          
           {user ? (
             <>
               <span className="font-semibold">{user.name}</span>

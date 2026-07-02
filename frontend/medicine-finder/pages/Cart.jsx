@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api.js";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const [cart, setCart] = useState({});
@@ -10,7 +11,7 @@ const Cart = () => {
     setCart(storedCart);
   }, []);
 
-  // ✅ INCREASE
+ 
   const increaseQty = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -24,7 +25,7 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  // ✅ DECREASE
+  
   const decreaseQty = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -45,7 +46,7 @@ const Cart = () => {
     localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  // ✅ REMOVE ITEM
+  
   const handleRemove = (pharmacyId, inventoryId) => {
     const updated = { ...cart };
 
@@ -72,15 +73,16 @@ const Cart = () => {
       quantity: item.quantity,
     }));
 
+    console.log("sending",{pharmacyId,items})
     try {
       const response = await API.post("/orders/reserve", {
         pharmacyId,
         items,
       });
 
-      alert(`Reservation Successful! \nReservation Code :${response.data.reservationCode}`);
+      toast.success(`Reservation Successful! \nReservation Code :${response.data.reservationCode}`);
 
-      // remove only that pharmacy
+     
       delete storedCart[pharmacyId];
 
       localStorage.setItem("cart", JSON.stringify(storedCart));
@@ -89,95 +91,157 @@ const Cart = () => {
       navigate('/orders');
     } catch (error) {
       console.log(error);
-      alert("Order failed");
+      toast.error("Order failed");
     }
   };
 
-  return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Your Cart</h2>
+ return (
+  <div className="max-w-5xl mx-auto p-6">
 
-      {Object.keys(cart).length === 0 ? (
-        <p>No items in cart</p>
-      ) : (
-        Object.keys(cart).map((pharmacyId) => {
-          const items = cart[pharmacyId];
+    <h1 className="text-3xl font-bold mb-8">
+      🛒 My Cart
+    </h1>
 
-          const total = items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          );
+    {Object.keys(cart).length === 0 ? (
+      <div className="text-center mt-20">
+        <h2 className="text-2xl font-semibold">
+          Your Cart is Empty
+        </h2>
 
-          return (
-            <div
-              key={pharmacyId}
-              className="border p-4 mb-6 rounded"
-            >
-              {/* Pharmacy Name */}
-              <h2 className="text-lg font-bold mb-3">
-                {items[0]?.pharmacyName}
-              </h2>
+        <p className="text-gray-500 mt-2">
+          Search medicines and add them to your cart.
+        </p>
 
-              {/* Items */}
-              {items.map((item) => (
-                <div
-                  key={item.inventoryId}
-                  className="border p-3 mb-2 rounded"
-                >
-                  <h3>{item.medicineName}</h3>
-                  <p>₹{item.price}</p>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-6 bg-green-600 text-white px-6 py-3 rounded-xl"
+        >
+          Continue Shopping
+        </button>
+      </div>
+    ) : (
+      Object.keys(cart).map((pharmacyId) => {
+        const items = cart[pharmacyId];
 
-                  <div className="flex items-center gap-2 mt-2">
+        const total = items.reduce(
+          (sum, item) => sum + item.price * item.quantity,
+          0
+        );
+
+        return (
+          <div
+            key={pharmacyId}
+            className="bg-white shadow-lg rounded-2xl p-6 mb-8"
+          >
+
+            <div className="flex justify-between items-center mb-5">
+
+              <div>
+                <h2 className="text-2xl font-bold text-green-700">
+                  🏥 {items[0]?.pharmacyName}
+                </h2>
+
+                <p className="text-gray-500">
+                  {items.length} medicine(s)
+                </p>
+              </div>
+
+            </div>
+
+            {items.map((item) => (
+              <div
+                key={item.inventoryId}
+                className="border rounded-xl p-4 mb-4 flex justify-between items-center"
+              >
+
+                <div>
+
+                  <h3 className="text-lg font-semibold">
+                    💊 {item.medicineName}
+                  </h3>
+
+                  <p className="text-green-700 font-bold mt-1">
+                    ₹{item.price}
+                  </p>
+
+                </div>
+
+                <div className="text-right">
+
+                  <div className="flex items-center justify-end gap-3">
+
                     <button
                       onClick={() =>
-                        decreaseQty(pharmacyId, item.inventoryId)
+                        decreaseQty(
+                          pharmacyId,
+                          item.inventoryId
+                        )
                       }
-                      className="bg-gray-300 px-2"
+                      className="bg-red-500 text-white w-8 h-8 rounded-full"
                     >
-                      -
+                      −
                     </button>
 
-                    <span>{item.quantity}</span>
+                    <span className="font-bold text-lg">
+                      {item.quantity}
+                    </span>
 
                     <button
                       onClick={() =>
-                        increaseQty(pharmacyId, item.inventoryId)
+                        increaseQty(
+                          pharmacyId,
+                          item.inventoryId
+                        )
                       }
-                      className="bg-gray-300 px-2"
+                      className="bg-green-600 text-white w-8 h-8 rounded-full"
                     >
                       +
                     </button>
+
                   </div>
 
                   <button
                     onClick={() =>
-                      handleRemove(pharmacyId, item.inventoryId)
+                      handleRemove(
+                        pharmacyId,
+                        item.inventoryId
+                      )
                     }
-                    className="bg-red-500 text-white px-2 py-1 mt-2 rounded"
+                    className="text-red-600 mt-3"
                   >
-                    Remove
+                    🗑 Remove
                   </button>
+
                 </div>
-              ))}
 
-              {/* Total */}
-              <h3 className="mt-4 font-bold text-lg">
-                Total: ₹{total}
-              </h3>
+              </div>
+            ))}
 
-              {/* Place Order */}
-              <button
-                onClick={() => handlePlaceOrder(pharmacyId)}
-                className="bg-green-600 text-white px-4 py-2 mt-4 rounded"
-              >
-                Place Order
-              </button>
+            <div className="border-t pt-5 mt-5 flex justify-between items-center">
+
+              <h2 className="text-2xl font-bold">
+                Total
+              </h2>
+
+              <h2 className="text-3xl font-bold text-green-700">
+                ₹{total}
+              </h2>
+
             </div>
-          );
-        })
-      )}
-    </div>
-  );
+
+            <button
+              onClick={() => handlePlaceOrder(pharmacyId)}
+              className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold"
+            >
+              Reserve Medicines
+            </button>
+
+          </div>
+        );
+      })
+    )}
+  </div>
+);
 };
 
 export default Cart;

@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import API from "../services/api";
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -17,23 +18,29 @@ const Login = () => {
 
         try {
             const res = await API.post("/user/login",form);
+            console.log(res.data);
 
             localStorage.setItem("token", res.data.AccessToken);
             localStorage.setItem("role",res.data.user.role);
             localStorage.setItem("user", JSON.stringify(res.data.user));
             
-            alert("login successfull");
-           if (res.data.user.role === "pharmacy") {
-             navigate("/pharmacy/dashboard");
-               } else {
-               navigate("/");
-}
+            toast.success("login successfull");
+           setTimeout(() => {
+  navigate(
+    res.data.user.role === "pharmacy"
+      ? "/pharmacy/dashboard"
+      : "/"
+  );
+  window.location.reload();
+}, 1000);
+           
+
 
 
         } catch (error) {
             const message =
                error.response?.data?.message || "Something went wrong";
-             alert(message);
+             toast.error(message);
         }
     }
 

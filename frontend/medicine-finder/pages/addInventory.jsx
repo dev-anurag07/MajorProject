@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const AddInventory = () => {
   const navigate = useNavigate();
@@ -27,11 +28,11 @@ const AddInventory = () => {
     try {
       await API.post("/inventory/add", form);
 
-      alert("Medicine added successfully");
+      toast.success("Medicine added successfully");
 
       navigate("/pharmacy/dashboard"); // go back
     } catch (error) {
-      alert(error.response?.data?.message || "Error adding medicine");
+      toast.error(error.response?.data?.message || "Error adding medicine");
     }
   };
 

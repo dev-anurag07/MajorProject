@@ -230,3 +230,24 @@ export const getPharmacyOrders = async (req, res) => {
     });
   }
 };
+
+export const searchOrderByCode=async(req,res)=>{
+  try {
+    
+const {code}=req.params;
+
+const order = await Order.findOne({reservationCode:code.toUpperCase(),}).populate("user","Name phoneNumber").populate("pharmacy","name address phoneNumber");
+if(!order){
+  return res.status(404).json({message:"Reservation not found"});
+}
+
+res.json({success:true, 
+  data :order
+});
+
+
+
+  } catch (error) {
+    res.status(500).json({message:"Server Error"})
+  }
+}
