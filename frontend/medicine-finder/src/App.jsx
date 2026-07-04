@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useContext} from 'react'
 import Home from "../pages/Home"
 import Login from '../pages/Login'
 import Navbar from '../components/Navbar'
@@ -18,15 +18,16 @@ import PharmacyProfile from '../pages/PharmacyProfile'
 import { Navigate } from 'react-router-dom'
 import Register from '../pages/Register'
 import UserProfile from '../pages/UserProfile'
-
+import EditMedicine from '../pages/EditMedicine'
 import {Toaster} from "react-hot-toast";
-
+import { AuthContext } from './context/Authcontext'
 
 
 
 
 const App = () => {
-  const role = localStorage.getItem("role");
+  const {role} = useContext(AuthContext);
+   
   console.log("Role:",role);
   return (
     <>
@@ -58,6 +59,9 @@ const App = () => {
      <Route path="/map-picker" element={<MapPicker/>}/>
      <Route path="/pharmacy/:id" element={<PharmacyDetails/>}/>
      <Route path ="/pharmacy/profile" element ={<PharmacyProfile/>}/>
+     <Route path="/edit-medicine/:medicineId" element={
+      role==="pharmacy"?<EditMedicine/>:<Navigate to="/"/>
+     }/>
     </Routes>
     </>
     

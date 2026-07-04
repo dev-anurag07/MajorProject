@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import API from "../services/api.js";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { TailSpin } from "react-loader-spinner";
 
 const Cart = () => {
   const [cart, setCart] = useState({});
+  const [loading, setloading] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || {};
@@ -37,7 +39,7 @@ const Cart = () => {
       )
       .filter((item) => item.quantity > 0);
 
-    // remove pharmacy if empty
+    
     if (updated[pharmacyId].length === 0) {
       delete updated[pharmacyId];
     }
@@ -64,7 +66,10 @@ const Cart = () => {
 
   
   const navigate = useNavigate();
+
+
   const handlePlaceOrder = async (pharmacyId) => {
+    setloading(true);
     const storedCart =
       JSON.parse(localStorage.getItem("cart")) || {};
 
@@ -92,6 +97,7 @@ const Cart = () => {
     } catch (error) {
       console.log(error);
       toast.error("Order failed");
+      setloading(false);
     }
   };
 
@@ -154,6 +160,10 @@ const Cart = () => {
                 className="border rounded-xl p-4 mb-4 flex justify-between items-center"
               >
 
+               <div className="flex items-center gap-4"> 
+                <img src={item.image}
+                alt={item.medicineName}
+                className="w-20 h-20 rounded-xl object-cover border"/>
                 <div>
 
                   <h3 className="text-lg font-semibold">
@@ -164,7 +174,7 @@ const Cart = () => {
                     ₹{item.price}
                   </p>
 
-                </div>
+                </div></div>
 
                 <div className="text-right">
 
@@ -229,12 +239,28 @@ const Cart = () => {
 
             </div>
 
-            <button
-              onClick={() => handlePlaceOrder(pharmacyId)}
-              className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold"
-            >
-              Reserve Medicines
-            </button>
+          <button
+  onClick={() => handlePlaceOrder(pharmacyId)}
+  disabled={loading}
+  className={`px-4 py-2 mt-4 rounded text-white flex items-center justify-center gap-2 ${
+    loading
+      ? "bg-gray-500 cursor-not-allowed"
+      : "bg-green-600 hover:bg-green-700"
+  }`}
+>
+  {loading ? (
+    <>
+      <TailSpin
+        height={20}
+        width={20}
+        color="white"
+      />
+      Reserving...
+    </>
+  ) : (
+    "Place Order"
+  )}
+</button>
 
           </div>
         );

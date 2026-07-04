@@ -13,10 +13,14 @@
     "@react-google-maps/api": "^2.20.8",
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.15.0",
+    "cloudinary": "^1.41.3",
     "lucide-react": "^1.8.0",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-hot-toast": "^2.6.0",
+    "react-loader-spinner": "^8.0.2",
     "react-router-dom": "^7.14.1"
   },
   "devDependencies": {

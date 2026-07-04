@@ -1,13 +1,21 @@
-import React from 'react'
+import React ,{useContext}from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import API from "../services/api";
 import toast from 'react-hot-toast';
+import { TailSpin } from 'react-loader-spinner';
+import { AuthContext } from '../src/context/Authcontext';
 
 const Login = () => {
     const navigate = useNavigate();
+    const{
+      setuser,
+      setrole,
+      settoken,
+    }=useContext(AuthContext);
 
     const [form, setform] = useState({email:"",password:""});
+    const [loading, setloading] = useState(false);
 
     const handleChange =(e)=>{
      setform({...form, [e.target.name]:e.target.value});
@@ -15,6 +23,7 @@ const Login = () => {
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        setloading(true);
 
         try {
             const res = await API.post("/user/login",form);
@@ -23,6 +32,11 @@ const Login = () => {
             localStorage.setItem("token", res.data.AccessToken);
             localStorage.setItem("role",res.data.user.role);
             localStorage.setItem("user", JSON.stringify(res.data.user));
+            
+
+            settoken(res.data.AccessToken);
+            setrole(res.data.user.role);
+            setuser(res.data.user);
             
             toast.success("login successfull");
            setTimeout(() => {
@@ -41,6 +55,7 @@ const Login = () => {
             const message =
                error.response?.data?.message || "Something went wrong";
              toast.error(message);
+             setloading(false);
         }
     }
 
@@ -67,9 +82,16 @@ const Login = () => {
         />
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-        >
-          Login
+          disabled={loading}
+          className={`w-full py-2 rounded text-white ${
+          loading ? "bg-gray-500 cursor-not-allowed":"bg-green-600 hover:bg-green-700"}`}>
+          {loading?(
+            <>
+            <TailSpin 
+            height ={20}
+            width={20}
+            color="white"/>
+            Logging in...</>):("Login")}
         </button>
 
         </form>

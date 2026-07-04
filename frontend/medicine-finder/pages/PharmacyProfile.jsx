@@ -3,12 +3,14 @@ import API from "../services/api";
 import toast from "react-hot-toast";
 
 const PharmacyProfile = () => {
-  const [profile, setProfile] = useState({
-    name:"",
-    phoneNumber:"",
-    address:"",
-    isOpen:false,
+  const [form, setForm] = useState({
+    name: "",
+    phoneNumber: "",
+    address: "",
   });
+
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     fetchProfile();
@@ -17,87 +19,109 @@ const PharmacyProfile = () => {
   const fetchProfile = async () => {
     try {
       const res = await API.get("/pharmacy/profile");
-      setProfile(res.data.data);
-    } catch (error) {
+
+      setForm({
+        name: res.data.data.name || "",
+        phoneNumber: res.data.data.phoneNumber || "",
+        address: res.data.data.address || "",
+      });
+
+      setPreview(res.data.data.image || "");
+    } catch (err) {
       toast.error("Failed to load profile");
     }
   };
 
-  const handleSave = async () => {
-  try {
-    const res = await API.put("/pharmacy/profile", profile);
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-    setProfile(res.data.data);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    toast.success("Profile updated successfully");
-  } catch (error) {
-    toast.error("Update failed");
-  }
-};
+    const formData = new FormData();
 
-  if (!profile) return <p className="p-6">Loading...</p>;
+    formData.append("name", form.name);
+    formData.append("phoneNumber", form.phoneNumber);
+    formData.append("address", form.address);
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    try {
+      await API.put("/pharmacy/profile", formData);
+
+      toast.success("Profile Updated");
+      fetchProfile();
+    } catch (err) {
+      toast.error("Update Failed");
+    }
+  };
 
   return (
-<div className="max-w-xl mx-auto p-6">
-  <h2 className="text-2xl font-bold mb-6">
-    Pharmacy Profile
-  </h2>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-xl shadow-lg w-96"
+      >
+        <h2 className="text-2xl font-bold text-center mb-5">
+          Pharmacy Profile
+        </h2>
 
-  <div className="space-y-4">
+        {preview && (
+          <img
+            src={preview}
+            alt="profile"
+            className="w-32 h-32 rounded-full mx-auto object-cover mb-4"
+          />
+        )}
 
-    <input
-      type="text"
-      value={profile.name}
-      onChange={(e) =>
-        setProfile({ ...profile, name: e.target.value })
-      }
-      placeholder="Pharmacy Name"
-      className="w-full border p-2 rounded"
-    />
+        <input
+          type="file"
+          onChange={(e) => {
+            setImage(e.target.files[0]);
+            setPreview(URL.createObjectURL(e.target.files[0]));
+          }}
+          className="mb-4"
+        />
 
-    <input
-      type="text"
-      value={profile.phoneNumber}
-      onChange={(e) =>
-        setProfile({ ...profile, phoneNumber: e.target.value })
-      }
-      placeholder="Phone Number"
-      className="w-full border p-2 rounded"
-    />
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Pharmacy Name"
+          className="w-full border p-2 rounded mb-3"
+        />
 
-    <input
-      type="text"
-      value={profile.address}
-      onChange={(e) =>
-        setProfile({ ...profile, address: e.target.value })
-      }
-      placeholder="Address"
-      className="w-full border p-2 rounded"
-    />
+        <input
+          type="text"
+          name="phoneNumber"
+          value={form.phoneNumber}
+          onChange={handleChange}
+          placeholder="Phone Number"
+          className="w-full border p-2 rounded mb-3"
+        />
 
-    <label className="flex items-center gap-2">
-      <input
-        type="checkbox"
-        checked={profile.isOpen}
-        onChange={(e) =>
-          setProfile({
-            ...profile,
-            isOpen: e.target.checked,
-          })
-        }
-      />
-      Pharmacy Open
-    </label>
+        <textarea
+          name="address"
+          value={form.address}
+          onChange={handleChange}
+          placeholder="Address"
+          className="w-full border p-2 rounded mb-4"
+        />
 
-    <button
-      onClick={handleSave}
-      className="bg-green-600 text-white px-4 py-2 rounded"
-    >
-      Save Changes
-    </button>
-
-  </div>
-</div>
+        <button
+          className="w-full bg-green-600 text-white py-2 rounded"
+        >
+          Update Profile
+        </button>
+      </form>
+    </div>
   );
 };
 

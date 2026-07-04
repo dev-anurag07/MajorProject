@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { TailSpin } from "react-loader-spinner";
 
 
 const Inventory = () => {
   const [inventory, setInventory] = useState([]);
+  const [loading, setloading] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,12 +16,16 @@ const Inventory = () => {
   }, []);
 
   const fetchInventory = async () => {
+    setloading(true);
     try {
       const res = await API.get("/inventory/my");
       setInventory(res.data.data);
     } catch (error) {
       console.log(error);
       toast.error("Failed to load inventory");
+     
+    }finally{
+       setloading(false);
     }
   };
 
@@ -52,6 +59,15 @@ const Inventory = () => {
     }
   };
 
+  if(loading){
+    return(
+      <div className="flex justify-center items-center h-screen">
+        <TailSpin height={70}
+        width={70}
+        color="#16a34a"/>
+      </div>
+    )
+  }
   return (
     <div className="max-w-6xl mx-auto p-6">
 
@@ -81,9 +97,11 @@ const Inventory = () => {
 
             <div className="flex items-center gap-5">
 
-              <div className="w-16 h-16 rounded-xl bg-green-100 flex items-center justify-center text-3xl">
-                💊
-              </div>
+              <img
+  src={item.image}
+  alt={item.medicineName}
+  className="w-16 h-16 rounded-xl object-cover border"
+/>
 
               <div>
                 <h2 className="text-xl font-bold">
@@ -176,7 +194,8 @@ const Inventory = () => {
                 />
                 <span>{item.isAvailable?"Available":"Not Available"}</span>
               </label>
-
+<button onClick={()=>navigate(`/edit-medicine/${item._id}`)}
+className="bg-blue-600 text-white px-4 py-2 rounded">Edit</button>
               <button
                 onClick={() => handleDelete(item._id)}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"

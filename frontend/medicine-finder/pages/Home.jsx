@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import PharmacyCard from "../components/PharmacyCard";
 import toast from "react-hot-toast";
+import {TailSpin} from "react-loader-spinner";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Home = () => {
   const [medicine, setMedicine] = useState("");
   const [sortBy, setsortBy] = useState("distance")
   const [results, setResults] = useState([]);
+  const [loading, setloading] = useState(false);
 
   useEffect(() => {
     checkAddress();
@@ -40,6 +42,7 @@ const Home = () => {
       toast.error("Enter medicine name");
       return;
     }
+setloading(true);
 
     try {
       const response = await API.get("/user/nearby", {
@@ -53,7 +56,11 @@ const Home = () => {
 
       setResults(response.data.data);
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to search medicines");
+     
+    }
+    finally{
+      setloading(false);
     }
   };
 
@@ -141,8 +148,15 @@ const Home = () => {
           </button>
         ))}
       </div>
-
-      {results.length > 0 && (
+{loading?(
+  <div className="flex justify-center mt-10">
+    <TailSpin 
+    height ="60"
+    width="60"
+    color="#16a34a"/>
+    </div>
+):
+      results.length > 0 && (
   <>
     <div className="flex justify-between items-center mb-4">
 

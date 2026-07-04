@@ -3,58 +3,123 @@ import API from "../services/api";
 import toast from "react-hot-toast";
 
 const UserProfile = () => {
-  const [user, setUser] = useState(null);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phoneNumber: "",
+  });
+
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await API.get("/user/profile");
-        setUser(res.data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchProfile();
   }, []);
 
-  if (!user) return <h2 className="p-6">Loading...</h2>;
+  const fetchProfile = async () => {
+    try {
+      const res = await API.get("/user/profile");
+console.log(res.data.data);
+      setForm({
+        name: res.data.data.Name,
+        email: res.data.data.email,
+        phoneNumber: res.data.data.phoneNumber || "",
+      });
+
+      setPreview(res.data.data.image);
+    } catch (error) {
+      toast.error("Failed to load profile");
+    }
+  };
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+
+    formData.append("name", form.name);
+    formData.append("phoneNumber", form.phoneNumber);
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    try {
+      await API.put("/user/profile", formData);
+
+      toast.success("Profile Updated");
+    } catch (error) {
+      toast.error("Update Failed");
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="bg-white shadow-lg rounded-xl p-6">
-
-        <div className="flex items-center gap-5">
-          <img
-            src={
-              user.avatar ||
-              `https://ui-avatars.com/api/?name=${user.Name}`
-            }
-            alt="avatar"
-            className="w-24 h-24 rounded-full"
-          />
-
-          <div>
-            <h1 className="text-3xl font-bold">{user.Name}</h1>
-            <p>{user.email}</p>
-            <p>{user.phoneNumber}</p>
-          </div>
-        </div>
-
-        <h2 className="text-xl font-semibold mt-8 mb-3">
-          Saved Addresses
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-xl shadow-lg w-96"
+      >
+        <h2 className="text-2xl font-bold text-center mb-5">
+          User Profile
         </h2>
 
-        {user.addresses.map((address, index) => (
-          <div
-            key={index}
-            className="border rounded-lg p-3 mb-3"
-          >
-            <h3 className="font-semibold">{address.label}</h3>
-            <p>{address.address}</p>
-          </div>
-        ))}
-      </div>
+        {preview && (
+          <img
+            src={preview}
+            alt="profile"
+            className="w-32 h-32 rounded-full object-cover border mx-auto mb-4"
+          />
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          className="mb-4"
+          onChange={(e) => {
+            setImage(e.target.files[0]);
+            setPreview(URL.createObjectURL(e.target.files[0]));
+          }}
+        />
+
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Name"
+          className="w-full border p-2 rounded mb-3"
+        />
+
+        <input
+          type="email"
+          value={form.email}
+          disabled
+          className="w-full border p-2 rounded mb-3 bg-gray-100"
+        />
+
+        <input
+          type="text"
+          name="phoneNumber"
+          value={form.phoneNumber}
+          onChange={handleChange}
+          placeholder="Phone Number"
+          className="w-full border p-2 rounded mb-4"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+        >
+          Update Profile
+        </button>
+      </form>
     </div>
   );
 };

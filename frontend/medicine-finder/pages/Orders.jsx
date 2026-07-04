@@ -1,20 +1,26 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import toast from "react-hot-toast";
+import { TailSpin } from "react-loader-spinner";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setloading] = useState(true);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   const fetchOrders = async () => {
+    setloading(true);
     try {
       const res = await API.get("/orders/my-orders");
       setOrders(res.data.data);
     } catch (error) {
       console.log(error);
+
+    } finally{
+      setloading(false);
     }
   };
 
@@ -33,7 +39,19 @@ const Orders = () => {
     }
   };
 
+
+  if(loading){
+    return(
+      <div className="flex justify-center items-center h-screen">
+        <TailSpin height={70}
+        width={70}
+        color="#16a34a"/>
+      </div>
+    )
+  }
   return (
+
+   
     <div className="max-w-6xl mx-auto p-6">
 
       <h1 className="text-3xl font-bold text-green-700 mb-2">
@@ -59,7 +77,7 @@ const Orders = () => {
             key={order._id}
             className="bg-white rounded-2xl shadow-md border mb-8 overflow-hidden"
           >
-            {/* Header */}
+            
             <div className="flex justify-between items-center bg-green-50 p-5 border-b">
 
               <div>
@@ -127,7 +145,7 @@ const Orders = () => {
                 </div>
               ))}
 
-              {/* Footer */}
+              
 
               <div className="flex justify-between items-center mt-5">
 

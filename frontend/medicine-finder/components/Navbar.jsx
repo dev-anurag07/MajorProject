@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate,useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../src/context/Authcontext";
 
 const Navbar = () => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-
-  const role = user?.role; // 🔥 key line
+  const {role,user,setuser,setrole,settoken}=useContext(AuthContext);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -18,6 +18,11 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    setuser(null);
+    setrole(null);
+    settoken(null);
+    
     navigate("/login");
   };
 

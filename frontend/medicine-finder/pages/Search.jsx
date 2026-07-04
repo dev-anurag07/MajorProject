@@ -85,10 +85,14 @@ const Search = () => {
       ) : (
         <div className="grid gap-4">
           {data.map((item, index) => (
+           
             <div
               key={index}
               className="border p-4 rounded-lg shadow flex justify-between items-center"
             >
+             
+            <div className="border p-4 rounded-lg shadow flex items-center">
+            
               <div>
                 <h3 className="font-semibold text-lg">
                   {item.medicineName}
@@ -105,6 +109,7 @@ const Search = () => {
                 <p className="text-green-600 font-bold text-lg">
                   ₹{item.price}
                 </p>
+              </div>
               </div>
 
               <button

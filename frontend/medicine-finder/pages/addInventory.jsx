@@ -3,6 +3,7 @@ import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+
 const AddInventory = () => {
   const navigate = useNavigate();
 
@@ -16,6 +17,9 @@ const AddInventory = () => {
   isAvailable: true,
 });
 
+const [image, setImage] = useState(null);
+
+
 
 
   const handleChange = (e) => {
@@ -25,16 +29,33 @@ const AddInventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      await API.post("/inventory/add", form);
+   try {
+  const formData = new FormData();
 
-      toast.success("Medicine added successfully");
+  formData.append("medicineName", form.medicineName);
+  formData.append("manufacturer", form.manufacturer);
+  formData.append("price", form.price);
+  formData.append("stockQuantity", form.stockQuantity);
+  formData.append("category", form.category);
+  formData.append("expiryDate", form.expiryDate);
+  formData.append("isAvailable", form.isAvailable);
 
-      navigate("/pharmacy/dashboard"); // go back
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error adding medicine");
-    }
-  };
+  if (image) {
+    formData.append("image", image);
+  }
+
+  await API.post("/inventory/add", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  toast.success("Medicine added successfully");
+  navigate("/pharmacy/dashboard");
+} catch (error) {
+  toast.error(error.response?.data?.message || "Error adding medicine");
+}
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">
@@ -106,15 +127,23 @@ const AddInventory = () => {
   <span className="ml-2">Available</span>
 </label>
 
-        <button
-          type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded"
-        >
-          Add
-        </button>
+<input
+  type="file"
+  accept="image/*"
+  className="w-full mb-4"
+  onChange={(e) => setImage(e.target.files[0])}
+/>
+
+<button
+  type="submit"
+  className="w-full bg-green-600 text-white py-2 rounded"
+>
+  Add
+</button>
       </form>
     </div>
   );
 };
+
 
 export default AddInventory;

@@ -36,74 +36,79 @@ try {
 }
 }
 
-  return (
-    <div>
-        <h1>Add New Address</h1>
+ return (
+  <div className="min-h-screen bg-gray-100 flex justify-center items-center py-10">
+    <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-8">
 
-        <button onClick={()=>navigate("/map-picker")} className='bg-blue-600 text-white px-4 py-2 rounded-lg'>Choose Location</button>
+      <h1 className="text-3xl font-bold text-center mb-6">
+        Add New Address
+      </h1>
 
-      <form onSubmit={handlesubmit}>
-        
-        <input type="text"
-        placeholder="Home/Ofiice"
-        value={formData.label}
-        onChange={(e)=> setformData({...formData,
-          label: e.target.value,
-        })}/>
+      <button
+        onClick={() => navigate("/map-picker")}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 mb-6"
+      >
+        📍 Choose Location
+      </button>
 
+      {location.state?.lat && (
+        <div className="bg-green-50 border border-green-300 rounded-lg p-3 mb-6">
+          <p className="font-semibold text-green-700">
+            ✓ Location Selected
+          </p>
+          <p className="text-sm">
+            Latitude: {location.state.lat}
+          </p>
+          <p className="text-sm">
+            Longitude: {location.state.lng}
+          </p>
+        </div>
+      )}
 
-        <input type="text"
-        placeholder="Address"
-        value={formData.address}
+      <form onSubmit={handlesubmit} className="space-y-4">
 
-        onChange={(e)=>setformData({...formData,
-          address: e.target.value,
-        })}/>
+        <input
+          type="text"
+          placeholder="🏠 Home / Office"
+          className="w-full border rounded-lg p-3"
+        />
 
+        <input
+          type="text"
+          placeholder="📍 Address"
+          className="w-full border rounded-lg p-3"
+        />
 
-        <input type="text"
-        placeholder="City"
-        value={formData.city}
+        <input
+          type="text"
+          placeholder="🏙 City"
+          className="w-full border rounded-lg p-3"
+        />
 
-        onChange={(e)=>setformData({...formData,
-          city:e.target.value,
-        })}/>
+        <input
+          type="text"
+          placeholder="🗺 State"
+          className="w-full border rounded-lg p-3"
+        />
 
-         <input type="text"
-        placeholder="State"
-        value={formData.state}
+        <input
+          type="text"
+          placeholder="📮 Pincode"
+          className="w-full border rounded-lg p-3"
+        />
 
-        onChange={(e)=>setformData({...formData,
-          state:e.target.value,
-        })}/>
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+        >
+          Save Address
+        </button>
 
-         <input type="text"
-        placeholder="Pincode"
-        value={formData.pincode}
-
-        onChange={(e)=>setformData({...formData,
-          pincode:e.target.value,
-        })}/>
-            
-
-            <button type="submit">Save Address</button>
       </form>
-         
 
-       <input type="text"
-        placeholder="Search Addres"/>
-
-        <div>
-            <p onClick={()=>navigate("/map-picker")}>Vijay Nagar, Indore</p>
-            <p>Palasia, Indore</p>
-        </div>
-
-        <div>
-          <p>{location.state?.lat}</p>
-           <p>{location.state?.lng}</p>
-        </div>
     </div>
-  )
+  </div>
+);
 }
 
 export default AddAddress;
