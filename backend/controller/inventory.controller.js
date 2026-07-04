@@ -1,7 +1,11 @@
 import Inventory from "../models/inventory.model.js";
 import Pharmacy from "../models/pharmacy.model.js";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
+import redisClient from "../config/redis.js";
 
 export const addMedicine = async (req, res) => {
+  console.log(req.file);
   try {
     const {
       medicineName,
@@ -20,7 +24,7 @@ export const addMedicine = async (req, res) => {
       });
     }
 
-    // 🔥 get pharmacy from logged-in user
+    
     const pharmacy = await Pharmacy.findOne({ owner: req.user.id });
 
     if (!pharmacy) {
@@ -29,6 +33,19 @@ export const addMedicine = async (req, res) => {
       });
     }
 
+    let imageurl = "";
+    if(req.file){
+      const result = await cloudinary.uploader.upload(req.file.path,{
+        folder: "medicine-finder",
+      });
+
+     if(req.file){
+      fs.unlinkSync(req.file.path);
+     }
+      
+
+      imageurl = result.secure_url;
+    }
    
     const newInventory = await Inventory.create({
       PharmacyId: pharmacy._id, 
@@ -38,9 +55,13 @@ export const addMedicine = async (req, res) => {
       stockQuantity,
       category,
       expiryDate,
+       image:imageurl,
       isAvailable:
         isAvailable !== undefined ? isAvailable : stockQuantity > 0,
+       
     });
+
+    await redisClient.del(`inventory:${pharmacy._id}`);
 
     res.status(201).json({
       success: true,
@@ -48,7 +69,10 @@ export const addMedicine = async (req, res) => {
       data: newInventory,
     });
 
+
   } catch (error) {
+    console.log(error);
+    console.log(error.message);
     res.status(500).json({
       message: "Server error",
       error: error.message,
@@ -68,6 +92,17 @@ export const UpdateMedicine =async(req,res)=>{
 
         const medicine = await Inventory.findById(medicineId);
 
+        let imageurl = medicine.image;
+
+        if(req.file){
+          const result = await cloudinary.uploader.upload(req.file.path,{
+              folder:"medicine-finder",
+          });
+
+          fs.unlinkSync(req.file.path);
+          imageurl =result.secure_url;
+        }
+
         if(!medicine){
             return res.status(400).json({message:"Medicine Not Found"});
         }
@@ -82,8 +117,12 @@ export const UpdateMedicine =async(req,res)=>{
         stockQuantity,
         manufacturer,
         category,
+        image:imageurl,
         isAvailable:isAvailable!==undefined?isAvailable:(stockQuantity!==undefined)?stockQuantity>0:medicine.isAvailable,
       },{new:true,runValidators:true})
+
+
+      await redisClient.del(`inventory:${pharmacy._id}`);
 
          res.status(200).json({
             success: true,
@@ -122,6 +161,8 @@ export const deleteMedicine = async (req,res)=>{
             }
 
             await Inventory.findByIdAndDelete(medicineId);
+
+            await redisClient.del(`inventory:${pharmacy._id}`);
             res.status(200).json({ success: true, message: "Medicine removed from inventory" })
         }
 
@@ -133,57 +174,124 @@ export const deleteMedicine = async (req,res)=>{
 
 export const getMyInventory = async (req, res) => {
   try {
-    // 🔥 find pharmacy of logged-in user
     const pharmacy = await Pharmacy.findOne({ owner: req.user.id });
 
     if (!pharmacy) {
       return res.status(404).json({
-        message: "Pharmacy not found"
+        message: "Pharmacy not found",
       });
     }
 
-    // 🔥 get inventory
+    const cacheKey = `inventory:${pharmacy._id}`;
+
+    
+    const cachedInventory = await redisClient.get(cacheKey);
+
+    if (cachedInventory) {
+      console.log("✅ Cache HIT");
+
+      return res.status(200).json(JSON.parse(cachedInventory));
+    }
+
+    console.log("❌ Cache MISS");
+
+  
     const inventory = await Inventory.find({
-      PharmacyId: pharmacy._id
+      PharmacyId: pharmacy._id,
     }).sort("-createdAt");
 
-    res.status(200).json({
+    const response = {
       success: true,
       count: inventory.length,
       data: inventory,
-    });
+    };
 
+    
+    await redisClient.setEx(
+      cacheKey,
+      300,
+      JSON.stringify(response)
+    );
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
 
 
-export const searchMedicine = async(req,res)=>{
-    try {
-        const { name } = req.query;
+export const searchMedicine = async (req, res) => {
+  try {
+    const { name } = req.query;
 
-        if (!name) {
-            return res.status(400).json({ message: "Please provide a medicine name" });
-        }
-
-        const results = await Inventory.find({
-             medicineName:{$regex : name, $options:"i"},
-             isAvailable:true,
-            stockQuantity:{$gt:0}
-        }).populate("PharmacyId","name address phoneNumber location")
-        .select("-__v")
-
-
-        res.status(201).json({
-            success:true,
-            count:results.length,
-            data:results,
-        })
-
-    } catch (error) {
-        res.status(500).json({ message: "Search failed", error: error.message });
+    if (!name) {
+      return res.status(400).json({
+        message: "Please provide a medicine name",
+      });
     }
-}
+
+    const cacheKey = `medicine:${name.toLowerCase()}`;
+
+  
+    const cachedData = await redisClient.get(cacheKey);
+
+    if (cachedData) {
+      console.log("Cache HIT");
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    console.log("Cache MISS");
+
+    const results = await Inventory.find({
+      medicineName: { $regex: name, $options: "i" },
+      isAvailable: true,
+      stockQuantity: { $gt: 0 },
+    })
+      .populate("PharmacyId", "name address phoneNumber location")
+      .select("-__v");
+
+    const response = {
+      success: true,
+      count: results.length,
+      data: results,
+    };
+
+    
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({
+      message: "Search failed",
+      error: error.message,
+    });
+  }
+};
+
+
+export const getMedicineById = async (req, res) => {
+  console.log("getmedicinebyid called");
+  console.log(req.params);
+  try {
+    const { medicineId } = req.params;
+
+    const medicine = await Inventory.findById(medicineId);
+
+    if (!medicine) {
+      return res.status(404).json({
+        message: "Medicine not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: medicine,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};

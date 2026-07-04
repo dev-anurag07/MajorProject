@@ -1,5 +1,8 @@
 import Inventory from "../models/inventory.model.js";
 import Pharmacy from "../models/pharmacy.model.js";
+import upload from "../middleware/multer.middleware.js";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 
 export const addPharmacy = async (req,res)=>{// this req has req.body and req.user and req.params and req.query
 try {
@@ -99,7 +102,8 @@ console.log(await Pharmacy.find());
     price: "$inventory_items.price", // ✅ IMPORTANT
     inventoryId: "$inventory_items._id",
     stockQuantity:"$inventory_items.stockQuantity",
-    isAvailable:"$inventory_items.isAvailable"
+    isAvailable:"$inventory_items.isAvailable",
+    image:"$inventory_items.image",
 
   }
 }
@@ -148,37 +152,70 @@ export const getPharmacydetails = async (req,res)=>{
     }
 }
 
-export const getPharmacyProfile= async(req,res)=>{
-try {
-  const pharmacy = await Pharmacy.findOne({owner:req.user._id});
 
-  if(!pharmacy){
-    return res.status(404).json({message:"Pharmacy not found"});
+export const getPharmacyProfile = async (req, res) => {
+  try {
+    const pharmacy = await Pharmacy.findOne({ owner: req.user.id });
+
+    if (!pharmacy) {
+      return res.status(404).json({
+        message: "Pharmacy not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: pharmacy,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
+};
 
- res.status(200).json({success:true,
-  data:pharmacy
- });
+export const updatePharmacyProfile = async (req, res) => {
+  console.log(req.file);
+  try {
+    const pharmacy = await Pharmacy.findOne({ owner: req.user.id });
+console.log(pharmacy);
+    if (!pharmacy) {
+      return res.status(404).json({
+        message: "Pharmacy not found",
+      });
+    }
 
+    if (req.body.name) pharmacy.name = req.body.name;
+    if (req.body.phoneNumber) pharmacy.phoneNumber = req.body.phoneNumber;
+    if (req.body.address) pharmacy.address = req.body.address;
 
+   if (req.file) {
+  console.log("Before upload");
 
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "medicine-finder",
+  });
+  console.log(result);
 
-} catch (error) {
-  res.status(500).json({message:error.message});
+  console.log("After upload", result.secure_url);
+
+  fs.unlinkSync(req.file.path);
+
+  console.log("After delete");
+
+  pharmacy.image = result.secure_url;
 }
-}
 
-export const updatePharmacyProfile= async(req,res)=>{
-try {
-  const pharmacy = await Pharmacy.findOneAndUpdate({owner:req.user._id},req.body,{new:true});
-  if(!pharmacy){
-    return res.status(404).json({message:"Pharmacy not found"});
+    await pharmacy.save();
+
+    res.json({
+      success: true,
+      message: "Profile Updated",
+      data: pharmacy,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
-
-  res.status(200).json({success:true,
-    data:pharmacy,
-  })
-} catch (error) {
-  res.status(500).json({message:error.message})
-}
-}
+};

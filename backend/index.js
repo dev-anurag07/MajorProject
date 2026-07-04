@@ -7,6 +7,7 @@ import Inventoryroutes from "./routes/inventory.routes.js"
 import Orderroutes from "./routes/order.routes.js"
 import startexpirationjob from "./utils/expireorder.js";
 import cors from "cors"
+import "./config/redis.js"
 
 dotenv.config();
 

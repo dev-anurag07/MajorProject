@@ -40,6 +40,11 @@ const pharmacySchema = new mongoose.Schema({
         required:true,
      },
 
+     image:{
+      type:String,
+      default:"",
+     },
+
      location:{
        type:{
         type:String,

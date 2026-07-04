@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
         enum:['user','pharmacy','admin']
     },
 
+    image:{
+        type:String,
+        default:"",
+    },
     addresses:[
        {
         label:{

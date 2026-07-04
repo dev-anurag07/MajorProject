@@ -3,6 +3,7 @@ import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import cloudinary from "../config/cloudinary.js"
 import fs from "fs"
+import upload from "../middleware/multer.middleware.js";
 
 const generateaccesstoken =(userId)=>{
     return jwt.sign({userId},process.env.ACCESS_SECRET_TOKEN,{expiresIn:"30m"});
@@ -205,16 +206,64 @@ res.status(200).json({
 }
 }
 
-export const getProfile = async (req, res) => {
+
+
+export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
     res.status(200).json({
       success: true,
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+
+export const updateUserProfile = async (req, res) => {
+    console.log("update route hit");
+  try {
+    const { name, phoneNumber } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    let imageUrl = user.image;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "medicine-finder",
+      });
+
+      fs.unlinkSync(req.file.path);
+
+      imageUrl = result.secure_url;
+    }
+
+    user.name = name || user.name;
+    user.phoneNumber = phoneNumber || user.phoneNumber;
+    user.image = imageUrl;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
       data: user,
     });
   } catch (error) {

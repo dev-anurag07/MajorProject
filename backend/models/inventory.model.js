@@ -39,6 +39,12 @@ const inventorySchema = new mongoose.Schema({
         type: Date
     },
 
+
+    image:{
+        type:String,
+        default:"",
+    },
+    
     isAvailable: {
         type: Boolean,
         default: true
