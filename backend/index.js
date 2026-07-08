@@ -14,7 +14,7 @@ dotenv.config();
 const app =express();
 
 app.use(cors({
-  origin: "http://localhost:5173", // frontend
+  origin: ["http://localhost:5173","https://major-project-sooty-eight.vercel.app"] ,// frontend
   credentials: true
 }));
 
