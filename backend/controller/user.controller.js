@@ -125,20 +125,20 @@ export const addAddress =async(req,res)=>{
 
 export const registerUser =async(req,res)=>{
     try {
-        const {Name, email,password,role,phoneNumber}= req.body;
-         if(!Name||!email||!password||!role||!phoneNumber){
-      res.status(400).json({message:"All fields are Required"});
+        const {name, email,password,role,phoneNumber}= req.body;
+         if(!name||!email||!password||!role||!phoneNumber){
+      return res.status(400).json({message:"All fields are Required"});
          }
 
 const Userexist = await User.findOne({email});
 if(Userexist){
-    res.status(400).json({message:"User already exist"});
+    return res.status(400).json({message:"User already exist"});
 }
 const hashPassword = await bcrypt.hash(password,10);
 
 
 const user =new User({
-   Name,
+   name,
    email,
    password:hashPassword,
    role,
@@ -147,14 +147,15 @@ const user =new User({
 
 await user.save();
 
-res.status(201).json({
+return res.status(201).json({
     success:true,
     message:"User Registered Successfully Pls Proceed to Login Page"
 });
 
 
     } catch (error) {
-        res.status(500).json({message:"registration failed",error:error.message});
+        console.log(error.message);
+       return res.status(500).json({message:"registration failed",error:error.message});
     }
 }
 
@@ -197,7 +198,7 @@ res.status(200).json({
     user:{
     id:user._id,
     email:user.email,
-    name:user.Name,
+    name:user.name,
     role:user.role,
 }
 })
@@ -231,7 +232,7 @@ export const getUserProfile = async (req, res) => {
 
 
 export const updateUserProfile = async (req, res) => {
-    console.log("update route hit");
+   
   try {
     const { name, phoneNumber } = req.body;
 
@@ -247,7 +248,7 @@ export const updateUserProfile = async (req, res) => {
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "medicine-finder",
+        folder: "medicine-finder",//cloudinary folder
       });
 
       fs.unlinkSync(req.file.path);

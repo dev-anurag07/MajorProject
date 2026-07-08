@@ -20,7 +20,7 @@ router.post('/add-address',protect,addAddress);
 router.get("/nearby",protect,getNearbyPharmacies)
 router.get("/getpharmacydetails/:id",protect,getPharmacydetails)
 router.get("/get-address",protect,getAddresses);
-router.get("/profile",protect,authorize("user"),getUserProfile);
-router.put("/profile",protect,authorize("user"),upload.single("image"),updateUserProfile);
+router.get("/profile",protect,getUserProfile);
+router.put("/profile",protect,upload.single("image"),updateUserProfile);
 
 export default router;

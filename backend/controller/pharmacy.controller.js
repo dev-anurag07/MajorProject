@@ -4,45 +4,74 @@ import upload from "../middleware/multer.middleware.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
 
-export const addPharmacy = async (req,res)=>{// this req has req.body and req.user and req.params and req.query
-try {
-    const {name, phoneNumber, address, longitude,latitude,licenseNumber}= req.body;
+export const addPharmacy = async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
-    if(!name || !longitude || !latitude || !licenseNumber){
-        return res.status(400).json({message:"Please provide all required fields including location"});
+    const {
+      name,
+      phoneNumber,
+      address,
+      latitude,
+      longitude,
+      licenseNumber,
+    } = req.body;
+
+    if (!name || !latitude || !longitude || !licenseNumber) {
+      return res.status(400).json({
+        message: "Please provide all required fields.",
+      });
     }
 
-
-    const newPharmacy = new Pharmacy({
-        name,
-        owner:req.user.id,
-        phoneNumber,
-        address,
-        location:{
-            type:"Point",
-            coordinates:[parseFloat(longitude),parseFloat(latitude)]
-        },
-        licenseNumber
-
+    const pharmacy = new Pharmacy({
+      owner: req.user.id,
+      name,
+      phoneNumber,
+      address,
+      licenseNumber,
+      location: {
+        type: "Point",
+        coordinates: [
+          Number(longitude),
+          Number(latitude),
+        ],
+      },
     });
 
-    await newPharmacy.save();
+    // Save image if uploaded
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "medicine-finder",
+      });
 
-    res.status(201).json({
-        success:true,
-        message:"Pharmacy registered successfully",
-        pharmacy: newPharmacy
+      pharmacy.image = result.secure_url;
+
+      fs.unlinkSync(req.file.path);
+    }
+
+    await pharmacy.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Pharmacy registered successfully",
+      data: pharmacy,
     });
 
-} catch (error) {
-    if(error.code === 11000){
-    return res.status(400).json({message:"license number already exists"});
-}
+  } catch (error) {
+    console.log(error);
 
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "License number already exists",
+      });
+    }
 
-res.status(500).json({message:"Server error", error:error.message});
-}
-}
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 
 export const getNearbyPharmacies = async (req,res)=>{

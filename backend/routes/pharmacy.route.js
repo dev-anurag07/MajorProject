@@ -8,7 +8,7 @@ import upload from "../middleware/multer.middleware.js";
 const router = express.Router();
 
 
-router.post("/register",protect,authorize("pharmacy"),addPharmacy);
+router.post("/register",protect,authorize("pharmacy"),upload.single("image"),addPharmacy);
 router.get("/profile",protect,authorize("pharmacy"),getPharmacyProfile);
 router.put("/profile",protect,authorize("pharmacy"),upload.single("image"),updatePharmacyProfile);
 
