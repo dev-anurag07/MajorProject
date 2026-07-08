@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import ProfileBanner from "./ProfileBanner";
 
 const PharmacyDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -13,10 +14,28 @@ const PharmacyDashboard = () => {
     totalRevenue:0,
     totalMedicines:0,
   })
+  const [showBanner, setshowBanner] = useState(false);
 
 const navigate = useNavigate();
 
+const checkPharmacyProfile = async () => {
+  try {
+    const res = await API.get("/pharmacy/profile");
 
+    const pharmacy = res.data.data;
+
+    if (
+      !pharmacy.name ||
+      !pharmacy.address ||
+      !pharmacy.phoneNumber ||
+      !pharmacy.image
+    ) {
+      setshowBanner(true);
+    }
+  } catch (error) {
+    setshowBanner(true);
+  }
+};
 
 const searchReservation = async ()=>{
   try {
@@ -48,6 +67,7 @@ const handleUpdateStatus = async (id, status) => {
   
   useEffect(() => {
     fetchOrders();
+    checkPharmacyProfile();
   }, []);
 
   const fetchOrders = async () => {
@@ -79,6 +99,13 @@ setstats({
 
   return (
     <div className="p-6">
+      {showBanner && (
+  <ProfileBanner
+    message="Complete your pharmacy profile before managing medicines."
+    buttonText="Complete Profile"
+    path="/pharmacy/profile"
+  />
+)}
     <div className="flex justify-between items-center mb-6">
   <h2 className="text-3xl font-bold text-green-700">
     🏥 Pharmacy Dashboard

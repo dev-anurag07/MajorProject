@@ -7,7 +7,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    Name: "",
+    name: "",
     email: "",
     password: "",
     phoneNumber: "",
@@ -25,7 +25,7 @@ const Register = () => {
 
     navigate("/login");
   } catch (error) {
-    console.log(error);
+    console.log(error.response);
     const message =
       error.response?.data?.message || "Registration Failed";
 
@@ -52,7 +52,7 @@ const Register = () => {
 
       <input
         type="text"
-        name="Name"
+        name="name"
         placeholder="Name"
         onChange={handleChange}
         className="w-full border rounded p-2 mb-3"

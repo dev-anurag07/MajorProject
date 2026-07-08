@@ -4,6 +4,7 @@ import API from "../services/api";
 import PharmacyCard from "../components/PharmacyCard";
 import toast from "react-hot-toast";
 import {TailSpin} from "react-loader-spinner";
+import ProfileBanner from "./ProfileBanner";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Home = () => {
   const [sortBy, setsortBy] = useState("distance")
   const [results, setResults] = useState([]);
   const [loading, setloading] = useState(false);
+  const [showBanner, setshowBanner] = useState(false);
 
   useEffect(() => {
     checkAddress();
@@ -24,13 +26,14 @@ const Home = () => {
   const checkAddress = async () => {
     const selectedAddress = localStorage.getItem("selectedAddress");
 
-    if (selectedAddress) return;
+   
 
     try {
       const res = await API.get("/user/get-address");
 
+     
       if (res.data.length === 0) {
-        navigate("/select-address");
+        setshowBanner(true);
       }
     } catch (error) {
       console.log(error);
@@ -94,7 +97,12 @@ setloading(true);
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-
+{showBanner&&(
+  <ProfileBanner message="add your address before searching nearby pharamcies."
+  buttonText="Select Address"
+  path="/select-address"
+/>
+)}
       <h1 className="text-4xl font-bold text-green-700 mb-6">
         💊 MediFinder
       </h1>

@@ -56,7 +56,7 @@ const Navbar = () => {
               <Link to="/pharmacy/dashboard">Dashboard</Link>
               <Link to="/inventory">Inventory</Link>
               <Link to="/add-inventory">Add Medicine</Link>
-              <Link to="/pharmacy/profile">Profile</Link>
+              <Link to="profile">Profile</Link>
             </>
           )}
 

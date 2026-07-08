@@ -22,13 +22,22 @@ const AddAddress = () => {
 
      console.log(formData)
 
+     const handleChange = (e) => {
+  setformData({
+    ...formData,
+    [e.target.name]: e.target.value,
+  });
+};
+
      const handlesubmit = async(e)=>{
 e.preventDefault();
 
 try {
       
   const response = await API.post("user/add-address", formData);
-  console.log(response.data);
+  toast.success("Address added successfully");
+
+  navigate("/");
 
 
 } catch (error) {
@@ -67,36 +76,45 @@ try {
 
       <form onSubmit={handlesubmit} className="space-y-4">
 
-        <input
-          type="text"
-          placeholder="🏠 Home / Office"
-          className="w-full border rounded-lg p-3"
-        />
-
-        <input
-          type="text"
-          placeholder="📍 Address"
-          className="w-full border rounded-lg p-3"
-        />
-
-        <input
-          type="text"
-          placeholder="🏙 City"
-          className="w-full border rounded-lg p-3"
-        />
-
-        <input
-          type="text"
-          placeholder="🗺 State"
-          className="w-full border rounded-lg p-3"
-        />
-
-        <input
-          type="text"
-          placeholder="📮 Pincode"
-          className="w-full border rounded-lg p-3"
-        />
-
+   <select name="label"
+   value={formData.label}
+   onChange={handleChange}>
+    <option value="Home">Home</option>
+    <option value="Work">Work</option>
+    <option value="Other">Other</option>
+   </select>
+<input
+  type="text"
+  name="address"
+  value={formData.address}
+  onChange={handleChange}
+  placeholder="📍 Address"
+  className="w-full border rounded-lg p-3"
+/>
+ <input
+  type="text"
+  name="city"
+  value={formData.city}
+  onChange={handleChange}
+  placeholder="🏙️ City"
+  className="w-full border rounded-lg p-3"
+/>
+ <input
+  type="text"
+  name="state"
+  value={formData.state}
+  onChange={handleChange}
+  placeholder="🗺️ State"
+  className="w-full border rounded-lg p-3"
+/>
+ <input
+  type="text"
+  name="pincode"
+  value={formData.pincode}
+  onChange={handleChange}
+  placeholder="📮 Pincode"
+  className="w-full border rounded-lg p-3"
+/>
         <button
           type="submit"
           className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"

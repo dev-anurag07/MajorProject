@@ -21,7 +21,7 @@ const UserProfile = () => {
       const res = await API.get("/user/profile");
 console.log(res.data.data);
       setForm({
-        name: res.data.data.Name,
+        name: res.data.data.name,
         email: res.data.data.email,
         phoneNumber: res.data.data.phoneNumber || "",
       });

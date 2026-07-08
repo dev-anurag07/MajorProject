@@ -65,6 +65,16 @@ const Login = () => {
         className="bg-white p-6 rounded-lg shadow-md w-80">
              <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
 
+             <p className="text-center mt-4">
+  Don't have an account?{" "}
+  <span
+    onClick={() => navigate("/register")}
+    className="text-green-600 font-semibold cursor-pointer hover:underline"
+  >
+    Register
+  </span>
+</p>
+
             <input
              type="email"
           name="email"
