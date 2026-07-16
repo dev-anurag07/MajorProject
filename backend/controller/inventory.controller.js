@@ -173,6 +173,7 @@ export const deleteMedicine = async (req,res)=>{
 
 
 export const getMyInventory = async (req, res) => {
+  console.log("getmyinventory called");
   try {
     const pharmacy = await Pharmacy.findOne({ owner: req.user.id });
 
@@ -215,6 +216,8 @@ export const getMyInventory = async (req, res) => {
 
     res.status(200).json(response);
   } catch (error) {
+
+    console.log("getmyinventory error:",error);
     res.status(500).json({
       message: error.message,
     });

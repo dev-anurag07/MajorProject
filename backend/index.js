@@ -20,11 +20,16 @@ app.use(cors({
 
 connectDB();
 
-//middleware to parse json and form data
+
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 startexpirationjob();
+
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
 
 app.use('/api/user',userRoutes);
 app.use("/api/pharmacy", Pharamcyroutes);
@@ -32,7 +37,7 @@ app.use("/api/inventory",Inventoryroutes);
 app.use("/api/orders",Orderroutes);
 
 
-
+console.log("new server started");
 const PORT =process.env.PORT||8000;
 app.listen(PORT,()=>{
     console.log(`server is listneing on ${PORT}`)
