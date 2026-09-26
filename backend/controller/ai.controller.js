@@ -67,6 +67,7 @@ export const searchNearbyMedicine = async (
         _id: 0,
         pharmacyId: "$_id",
         pharmacyName: "$name",
+        address: "$address",
         distance_km: 1,
         medicineName: "$inventory_items.medicineName",
         price: "$inventory_items.price",
