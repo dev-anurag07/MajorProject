@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import Pharmacy from "../models/pharmacy.model.js";
+import Order from "../models/order.model.js";
 
 
 dotenv.config();
@@ -9,6 +10,15 @@ const groq = new Groq({
   apiKey: process.env.GROQ_LLM_API,
 });
 
+export const getMyOrders = async (userId) => {
+  const orders = await Order.find({
+    user: userId
+  })
+    .populate("pharmacy", "name address phoneNumber")
+    .sort("-createdAt");
+
+  return orders;
+};
 
 
 export const searchNearbyMedicine = async (
@@ -160,9 +170,7 @@ export const aiAssistant = async (req, res) => {
 
        
         if (functionName === "getMyOrders") {
-          result = {
-            message: "Orders functionality coming next",
-          };
+          result = await getMyOrders(req.user.id);
         }
 
         
