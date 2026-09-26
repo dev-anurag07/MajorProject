@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
+import Pharmacy from "../models/pharmacy.model.js";
 
 
 dotenv.config();
