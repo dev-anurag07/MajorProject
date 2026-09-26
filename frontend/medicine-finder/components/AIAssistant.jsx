@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import API from "../services/api";
+import ReactMarkdown from "react-markdown";
 
 const AIAssistant = () => {
   const [message, setMessage] = useState("");
@@ -62,7 +63,9 @@ const AIAssistant = () => {
 
       {response && (
         <div className="mt-4 bg-gray-100 rounded-lg p-4">
-          <p>{response}</p>
+          <ReactMarkdown>
+  {response}
+</ReactMarkdown>
         </div>
       )}
     </div>
