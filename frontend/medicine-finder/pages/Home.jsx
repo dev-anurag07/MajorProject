@@ -5,6 +5,8 @@ import PharmacyCard from "../components/PharmacyCard";
 import toast from "react-hot-toast";
 import {TailSpin} from "react-loader-spinner";
 import ProfileBanner from "./ProfileBanner";
+import AIAssistant from "../components/AIAssistant";
+
 
 const Home = () => {
   const navigate = useNavigate();
@@ -106,7 +108,7 @@ setloading(true);
       <h1 className="text-4xl font-bold text-green-700 mb-6">
         💊 MediFinder
       </h1>
-
+      
       <button
         onClick={() => navigate("/select-address")}
         className="w-full bg-white border rounded-xl shadow p-4 text-left mb-6 hover:shadow-md"
@@ -144,7 +146,7 @@ setloading(true);
       <h2 className="text-2xl font-semibold mb-4">
         Popular Medicines
       </h2>
-
+       
       <div className="flex flex-wrap gap-3 mb-8">
         {popularMedicines.map((item) => (
           <button
@@ -196,7 +198,7 @@ setloading(true);
           </div>
         </>
       )}
-
+ <AIAssistant />
     </div>
   );
 };
