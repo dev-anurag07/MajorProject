@@ -163,7 +163,7 @@ export const aiAssistant = async (req, res) => {
           result = await searchNearbyMedicine(
             lat,
             lang,
-            5,
+            5000,
             args.medicine
           );
         }
