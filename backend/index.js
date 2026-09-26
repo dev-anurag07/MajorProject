@@ -37,7 +37,7 @@ app.use("/api/inventory",Inventoryroutes);
 app.use("/api/orders",Orderroutes);
 
 
-console.log("new server started");
+
 const PORT =process.env.PORT||8000;
 app.listen(PORT,()=>{
     console.log(`server is listneing on ${PORT}`)
