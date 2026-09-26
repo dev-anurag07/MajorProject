@@ -248,3 +248,11 @@ console.log(pharmacy);
     });
   }
 };
+
+
+
+
+
+
+
+

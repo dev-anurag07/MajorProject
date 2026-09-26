@@ -184,14 +184,14 @@ if(!Match){
 const AccessToken = generateaccesstoken(user._id);
 const RefreshToken= generaterefreshtoken(user._id);
 
-//send refresh token in cookies 
+
 res.cookie("RefreshToken",RefreshToken,{
     httpOnly:true,
     secure:true,
     sameSite:true,
 })
 
-//send access token and user deatils for fast ui changes
+
 res.status(200).json({
     message:"User login Successfully",
     AccessToken,
@@ -273,3 +273,4 @@ export const updateUserProfile = async (req, res) => {
     });
   }
 };
+
